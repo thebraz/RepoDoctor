@@ -1,0 +1,55 @@
+{
+  "name": "repodoctor",
+  "version": "0.3.3",
+  "license": "MIT",
+  "description": "Local repository analysis with structural scores and review priorities.",
+  "type": "module",
+  "bin": {
+    "repodoctor": "dist/src/cli.js"
+  },
+  "files": [
+    "dist/src/*.js",
+    "report.schema.json"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build": "tsc",
+    "prepack": "tsc",
+    "prepublishOnly": "tsc && node --test dist/test/*.test.js",
+    "test": "tsc && node --test dist/test/*.test.js",
+    "verify:package": "node scripts/verify-package.mjs"
+  },
+  "dependencies": {
+    "ignore": "7.0.12",
+    "typescript": "~5.9.3",
+    "yaml": "~2.8.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0"
+  },
+  "keywords": [
+    "static-analysis",
+    "repository-analysis",
+    "code-quality",
+    "maintainability",
+    "cli",
+    "typescript",
+    "javascript",
+    "code-duplication"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thebraz/RepoDoctor.git"
+  },
+  "homepage": "https://github.com/thebraz/RepoDoctor#readme",
+  "bugs": {
+    "url": "https://github.com/thebraz/RepoDoctor/issues"
+  }
+}

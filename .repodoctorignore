@@ -1,0 +1,2 @@
+# The example contains an intentional cycle; scan it separately.
+examples/

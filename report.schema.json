@@ -1,0 +1,593 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "RepoDoctor report 1.3",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion","root","limitations","configuration","coverage","files","dependencies","findings","diagnostics","entryPoints","unusedFiles","packages","metrics","duplicates","languages","ignoreFiles","analysisCoverage","score","view"],
+  "properties": {
+    "schemaVersion": {"const":"1.3"},
+    "ignoreFiles": {"type":"array","items":{"type":"string"},"uniqueItems":true},
+    "languages": {
+      "type":"array",
+      "items": {
+        "type":"object","additionalProperties":false,"required":["name","mode","discoveredFiles","analyzedFiles"],
+        "properties": {
+          "name":{"type":"string"},"mode":{"enum":["syntax","text"]},
+          "discoveredFiles":{"type":"integer","minimum":0},"analyzedFiles":{"type":"integer","minimum":0}
+        }
+      }
+    },
+    "root": {"type":"string"},
+    "limitations": {
+      "type": "array",
+      "items": {"type":"string"}
+    },
+    "configuration": {"$ref":"#/$defs/configuration"},
+    "coverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status","discoveredFiles","analyzedFiles","skippedEntries","bytesRead"],
+      "properties": {
+        "status": {"enum":["complete","partial","failed"]},
+        "discoveredFiles": {"type":"integer","minimum":0},
+        "analyzedFiles": {"type":"integer","minimum":0},
+        "skippedEntries": {"type":"integer","minimum":0},
+        "bytesRead": {"type":"integer","minimum":0}
+      }
+    },
+    "files": {
+      "type": "array",
+      "items": {"type":"string"},
+      "uniqueItems": true
+    },
+    "dependencies": {
+      "type": "array",
+      "items": {"$ref":"#/$defs/dependency"}
+    },
+    "findings": {
+      "type": "array",
+      "items": {"$ref":"#/$defs/finding"}
+    },
+    "diagnostics": {
+      "type": "array",
+      "items": {"$ref":"#/$defs/diagnostic"}
+    },
+    "entryPoints": {
+      "type": "array",
+      "items": {"$ref":"#/$defs/entryPoint"}
+    },
+    "unusedFiles": {
+      "type": "array",
+      "items": {"$ref":"#/$defs/fileUsage"}
+    },
+    "packages": {
+      "type": "array",
+      "items": {"$ref":"#/$defs/packageUsage"}
+    },
+    "metrics": {
+      "type": "array",
+      "items": {"$ref":"#/$defs/fileMetric"}
+    },
+    "duplicates": {
+      "type": "array",
+      "items": {"$ref":"#/$defs/duplicateGroup"}
+    },
+    "analysisCoverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cycles","unusedFiles","packages","size","duplication"],
+      "properties": {
+        "cycles": {"$ref":"#/$defs/coverageByCategory"},
+        "unusedFiles": {"$ref":"#/$defs/coverageByCategory"},
+        "packages": {"$ref":"#/$defs/coverageByCategory"},
+        "size": {"$ref":"#/$defs/coverageByCategory"},
+        "duplication": {"$ref":"#/$defs/coverageByCategory"}
+      }
+    },
+    "score": {"$ref":"#/$defs/score"},
+    "view": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["query","totalFindings"],
+      "properties": {
+        "query": {"enum":["scan","architecture","duplicates","dead-code"]},
+        "totalFindings": {"type":"integer","minimum":0}
+      }
+    }
+  },
+  "$defs": {
+    "limits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["maxFiles","maxEntries","maxDepth","maxFileBytes","maxTotalBytes","maxParseTimeMs","maxAstNodes","maxDependencies","maxFindings","timeoutMs","maxDuplicationTokens","maxDuplicationBlocks","maxDuplicationComparisons"],
+      "properties": {
+        "maxFiles": {"type":"integer","minimum":1,"maximum":100000},
+        "maxEntries": {"type":"integer","minimum":1,"maximum":1000000},
+        "maxDepth": {"type":"integer","minimum":1,"maximum":128},
+        "maxFileBytes": {"type":"integer","minimum":1,"maximum":8388608},
+        "maxTotalBytes": {"type":"integer","minimum":1,"maximum":268435456},
+        "maxParseTimeMs": {"type":"integer","minimum":1,"maximum":30000},
+        "maxAstNodes": {"type":"integer","minimum":1,"maximum":1000000},
+        "maxDependencies": {"type":"integer","minimum":1,"maximum":1000000},
+        "maxFindings": {"type":"integer","minimum":1,"maximum":10000},
+        "timeoutMs": {"type":"integer","minimum":1,"maximum":300000},
+        "maxDuplicationTokens": {"type":"integer","minimum":1,"maximum":2000000},
+        "maxDuplicationBlocks": {"type":"integer","minimum":1,"maximum":100000},
+        "maxDuplicationComparisons": {"type":"integer","minimum":1,"maximum":20000000}
+      }
+    },
+    "dependency": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["from","line","column","specifier","kind","syntax","resolution","to","reason"],
+      "properties": {
+        "from": {"type":"string"},
+        "line": {"type":"integer","minimum":1},
+        "column": {"type":"integer","minimum":1},
+        "specifier": {"type":["string","null"]},
+        "kind": {"enum":["runtime","type-only"]},
+        "syntax": {"enum":["import","re-export","require","dynamic-import","import-type"]},
+        "resolution": {"enum":["internal","external","unresolved","indeterminate"]},
+        "to": {"type":["string","null"]},
+        "reason": {"type":["string","null"]}
+      }
+    },
+    "diagnostic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code","severity","message"],
+      "properties": {
+        "code": {"type":"string"},
+        "severity": {"enum":["warning","error"]},
+        "message": {"type":"string"},
+        "file": {"type":"string"},
+        "line": {"type":"integer","minimum":1},
+        "column": {"type":"integer","minimum":1}
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["from","to","line","column"],
+      "properties": {
+        "from": {"type":"string"},
+        "to": {"type":"string"},
+        "line": {"type":"integer","minimum":1},
+        "column": {"type":"integer","minimum":1}
+      }
+    },
+    "finding": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ruleId","category","title","description","severity","confidence","file","line","relatedFiles","evidence","recommendation"],
+          "properties": {
+            "ruleId": {"const":"runtime-cycle"},
+            "category": {"const":"dependencies"},
+            "title": {"type":"string"},
+            "description": {"type":"string"},
+            "severity": {"enum":["warning","info"]},
+            "context": {"$ref":"#/$defs/findingContext"},
+            "confidence": {"const":"CONFIRMED"},
+            "file": {"type":"string"},
+            "line": {"type":"integer","minimum":1},
+            "relatedFiles": {
+              "type": "array",
+              "items": {"type":"string"},
+              "minItems": 1,
+              "uniqueItems": true
+            },
+            "evidence": {
+              "type": "array",
+              "items": {"$ref":"#/$defs/evidence"},
+              "minItems": 1
+            },
+            "recommendation": {"type":"string"}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ruleId","category","title","description","severity","confidence","file","relatedFiles","recommendation","subject","evidence"],
+          "properties": {
+            "ruleId": {"const":"potentially-unused-file"},
+            "category": {"const":"unused"},
+            "title": {"type":"string"},
+            "description": {"type":"string"},
+            "severity": {"enum":["warning","info"]},
+            "context": {"$ref":"#/$defs/findingContext"},
+            "confidence": {"enum":["CONFIRMED","LIKELY","SUSPICIOUS","UNKNOWN"]},
+            "file": {"type":"string"},
+            "line": {"type":"integer","minimum":1},
+            "relatedFiles": {
+              "type": "array",
+              "items": {"type":"string"},
+              "uniqueItems": true
+            },
+            "recommendation": {"type":"string"},
+            "subject": {"type":"string"},
+            "evidence": {
+              "type": "array",
+              "items": {"$ref":"#/$defs/locationEvidence"},
+              "minItems": 1
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ruleId","category","title","description","severity","confidence","file","relatedFiles","recommendation","subject","evidence"],
+          "properties": {
+            "ruleId": {"const":"potentially-unused-package"},
+            "category": {"const":"packages"},
+            "title": {"type":"string"},
+            "description": {"type":"string"},
+            "severity": {"enum":["warning","info"]},
+            "context": {"$ref":"#/$defs/findingContext"},
+            "confidence": {"enum":["CONFIRMED","LIKELY","SUSPICIOUS","UNKNOWN"]},
+            "file": {"type":"string"},
+            "line": {"type":"integer","minimum":1},
+            "relatedFiles": {
+              "type": "array",
+              "items": {"type":"string"},
+              "uniqueItems": true
+            },
+            "recommendation": {"type":"string"},
+            "subject": {"type":"string"},
+            "evidence": {
+              "type": "array",
+              "items": {"$ref":"#/$defs/locationEvidence"},
+              "minItems": 1
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ruleId","category","title","description","severity","confidence","file","relatedFiles","recommendation","subject","evidence"],
+          "properties": {
+            "ruleId": {"const":"oversized-file"},
+            "category": {"const":"size"},
+            "title": {"type":"string"},
+            "description": {"type":"string"},
+            "severity": {"enum":["warning","info"]},
+            "context": {"$ref":"#/$defs/findingContext"},
+            "confidence": {"enum":["CONFIRMED","LIKELY","SUSPICIOUS","UNKNOWN"]},
+            "file": {"type":"string"},
+            "line": {"type":"integer","minimum":1},
+            "relatedFiles": {
+              "type": "array",
+              "items": {"type":"string"},
+              "uniqueItems": true
+            },
+            "recommendation": {"type":"string"},
+            "subject": {"type":"string"},
+            "evidence": {
+              "type": "array",
+              "items": {"$ref":"#/$defs/locationEvidence"},
+              "minItems": 1
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ruleId","category","title","description","severity","confidence","file","relatedFiles","recommendation","subject","evidence"],
+          "properties": {
+            "ruleId": {"const":"oversized-function"},
+            "category": {"const":"size"},
+            "title": {"type":"string"},
+            "description": {"type":"string"},
+            "severity": {"enum":["warning","info"]},
+            "context": {"$ref":"#/$defs/findingContext"},
+            "confidence": {"enum":["CONFIRMED","LIKELY","SUSPICIOUS","UNKNOWN"]},
+            "file": {"type":"string"},
+            "line": {"type":"integer","minimum":1},
+            "relatedFiles": {
+              "type": "array",
+              "items": {"type":"string"},
+              "uniqueItems": true
+            },
+            "recommendation": {"type":"string"},
+            "subject": {"type":"string"},
+            "evidence": {
+              "type": "array",
+              "items": {"$ref":"#/$defs/locationEvidence"},
+              "minItems": 1
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ruleId","category","title","description","severity","confidence","file","relatedFiles","recommendation","subject","evidence"],
+          "properties": {
+            "ruleId": {"const":"duplicate-block"},
+            "category": {"const":"duplication"},
+            "title": {"type":"string"},
+            "description": {"type":"string"},
+            "severity": {"enum":["warning","info"]},
+            "context": {"$ref":"#/$defs/findingContext"},
+            "confidence": {"enum":["CONFIRMED","LIKELY","SUSPICIOUS","UNKNOWN"]},
+            "file": {"type":"string"},
+            "line": {"type":"integer","minimum":1},
+            "relatedFiles": {
+              "type": "array",
+              "items": {"type":"string"},
+              "uniqueItems": true
+            },
+            "recommendation": {"type":"string"},
+            "subject": {"type":"string"},
+            "evidence": {
+              "type": "array",
+              "items": {"$ref":"#/$defs/locationEvidence"},
+              "minItems": 1
+            }
+          }
+        }
+      ]
+    },
+    "findingContext": {
+      "type":"object","additionalProperties":false,"required":["role","factor","reason"],
+      "properties": {
+        "role":{"enum":["application","test","migration","tooling","unknown"]},
+        "factor":{"type":"number","minimum":0,"maximum":1},
+        "reason":{"type":"string"}
+      }
+    },
+    "configuration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["profile","scope","respectGitignore","sourceExtensions","exclude","entryPoints","limits","thresholds","duplication","score"],
+      "properties": {
+        "profile": {"enum":["standard","large"]},
+        "scope": {"type":"array","items":{"type":"string"},"maxItems":128,"uniqueItems":true},
+        "respectGitignore": {"type":"boolean"},
+        "sourceExtensions": {"type":"array","items":{"type":"string","pattern":"^\\.[a-z0-9]{1,16}$"},"maxItems":128,"uniqueItems":true},
+        "exclude": {
+          "type": "array",
+          "items": {"type":"string"},
+          "uniqueItems": true
+        },
+        "entryPoints": {
+          "type": "array",
+          "items": {"type":"string"},
+          "maxItems": 128,
+          "uniqueItems": true
+        },
+        "limits": {"$ref":"#/$defs/limits"},
+        "thresholds": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["fileLines","functionLines"],
+          "properties": {
+            "fileLines": {"type":"integer","minimum":1,"maximum":100000},
+            "functionLines": {"type":"integer","minimum":1,"maximum":100000}
+          }
+        },
+        "duplication": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["minTokens","minLines","minBytes"],
+          "properties": {
+            "minTokens": {"type":"integer","minimum":1,"maximum":1000},
+            "minLines": {"type":"integer","minimum":1,"maximum":1000},
+            "minBytes": {"type":"integer","minimum":1,"maximum":100000}
+          }
+        },
+        "score": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["weights","caps"],
+          "properties": {
+            "weights": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["runtime-cycle","potentially-unused-file","potentially-unused-package","oversized-file","oversized-function","duplicate-block"],
+              "properties": {
+                "runtime-cycle": {"type":"number","minimum":0,"maximum":100},
+                "potentially-unused-file": {"type":"number","minimum":0,"maximum":100},
+                "potentially-unused-package": {"type":"number","minimum":0,"maximum":100},
+                "oversized-file": {"type":"number","minimum":0,"maximum":100},
+                "oversized-function": {"type":"number","minimum":0,"maximum":100},
+                "duplicate-block": {"type":"number","minimum":0,"maximum":100}
+              }
+            },
+            "caps": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["cycles","unusedFiles","packages","size","duplication"],
+              "properties": {
+                "cycles": {"type":"number","minimum":0,"maximum":100},
+                "unusedFiles": {"type":"number","minimum":0,"maximum":100},
+                "packages": {"type":"number","minimum":0,"maximum":100},
+                "size": {"type":"number","minimum":0,"maximum":100},
+                "duplication": {"type":"number","minimum":0,"maximum":100}
+              }
+            }
+          }
+        }
+      }
+    },
+    "coverageByCategory": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status","reason"],
+      "properties": {
+        "status": {"enum":["complete","partial","unavailable"]},
+        "reason": {"type":["string","null"]}
+      }
+    },
+    "locationEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["file","detail"],
+      "properties": {
+        "file": {"type":"string"},
+        "line": {"type":"integer","minimum":1},
+        "column": {"type":"integer","minimum":1},
+        "endLine": {"type":"integer","minimum":1},
+        "detail": {"type":"string"}
+      }
+    },
+    "entryPoint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["file","reason","origin"],
+      "properties": {
+        "file": {"type":"string"},
+        "reason": {"type":"string"},
+        "origin": {"enum":["configured","public-api","script","test","convention","framework"]},
+        "purpose": {"enum":["application","test","tooling"]}
+      }
+    },
+    "fileUsage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["file","state","confidence","reason"],
+      "properties": {
+        "file": {"type":"string"},
+        "state": {"enum":["reachable","candidate","unknown"]},
+        "confidence": {"enum":["CONFIRMED","LIKELY","SUSPICIOUS","UNKNOWN"]},
+        "reason": {"type":"string"}
+      }
+    },
+    "packageUsage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name","manifest","sections","state","confidence","evidence"],
+      "properties": {
+        "name": {"type":"string"},
+        "manifest": {"type":"string"},
+        "sections": {
+          "type": "array",
+          "items": {"enum":["dependencies","devDependencies","peerDependencies","optionalDependencies"]},
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "state": {"enum":["used","candidate","indirect","unknown"]},
+        "confidence": {"enum":["CONFIRMED","LIKELY","SUSPICIOUS","UNKNOWN"]},
+        "evidence": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["kind","file","detail"],
+            "properties": {
+              "kind": {"enum":["runtime","type-only","script","indirect","unknown"]},
+              "file": {"type":"string"},
+              "line": {"type":"integer","minimum":1},
+              "detail": {"type":"string"}
+            }
+          }
+        }
+      }
+    },
+    "functionMetric": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name","line","column","endLine","lines"],
+      "properties": {
+        "name": {"type":"string"},
+        "line": {"type":"integer","minimum":1},
+        "column": {"type":"integer","minimum":1},
+        "endLine": {"type":"integer","minimum":1},
+        "lines": {"type":"integer","minimum":1}
+      }
+    },
+    "fileMetric": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["file","lines","functions"],
+      "properties": {
+        "file": {"type":"string"},
+        "lines": {"type":"integer","minimum":0},
+        "functions": {
+          "type": "array",
+          "items": {"$ref":"#/$defs/functionMetric"}
+        }
+      }
+    },
+    "duplicateGroup": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id","tokens","method","blocks"],
+      "properties": {
+        "id": {"type":"string"},
+        "tokens": {"type":"integer","minimum":0},
+        "method": {"enum":["tokens","exact-text"]},
+        "bytes": {"type":"integer","minimum":0},
+        "blocks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["file","line","column","endLine"],
+            "properties": {
+              "file": {"type":"string"},
+              "line": {"type":"integer","minimum":1},
+              "column": {"type":"integer","minimum":1},
+              "endLine": {"type":"integer","minimum":1}
+            }
+          },
+          "minItems": 2
+        }
+      }
+    },
+    "score": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["formulaVersion","status","value","observedValue","explanation","confidenceFactors","contributions","penalties"],
+      "properties": {
+        "formulaVersion": {"const":"1.1"},
+        "status": {"enum":["complete","partial","unavailable"]},
+        "value": {"type":["number","null"],"minimum":0,"maximum":100},
+        "observedValue": {"type":["number","null"],"minimum":0,"maximum":100},
+        "explanation": {"type":"string"},
+        "confidenceFactors": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["CONFIRMED","LIKELY","SUSPICIOUS","UNKNOWN"],
+          "properties": {
+            "CONFIRMED": {"type":"number","minimum":0,"maximum":1},
+            "LIKELY": {"type":"number","minimum":0,"maximum":1},
+            "SUSPICIOUS": {"type":"number","minimum":0,"maximum":1},
+            "UNKNOWN": {"type":"number","minimum":0,"maximum":1}
+          }
+        },
+        "contributions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["key","ruleId","category","file","confidence","weight","contextFactor","rawPenalty","appliedPenalty"],
+            "properties": {
+              "key": {"type":"string"},
+              "ruleId": {"enum":["runtime-cycle","potentially-unused-file","potentially-unused-package","oversized-file","oversized-function","duplicate-block"]},
+              "category": {"enum":["cycles","unusedFiles","packages","size","duplication"]},
+              "file": {"type":"string"},
+              "confidence": {"enum":["CONFIRMED","LIKELY","SUSPICIOUS","UNKNOWN"]},
+              "weight": {"type":"number","minimum":0,"maximum":100},
+              "contextFactor": {"type":"number","minimum":0,"maximum":1},
+              "rawPenalty": {"type":"number","minimum":0,"maximum":100},
+              "appliedPenalty": {"type":"number","minimum":0,"maximum":100}
+            }
+          }
+        },
+        "penalties": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["cycles","unusedFiles","packages","size","duplication"],
+          "properties": {
+            "cycles": {"type":"number","minimum":0,"maximum":100},
+            "unusedFiles": {"type":"number","minimum":0,"maximum":100},
+            "packages": {"type":"number","minimum":0,"maximum":100},
+            "size": {"type":"number","minimum":0,"maximum":100},
+            "duplication": {"type":"number","minimum":0,"maximum":100}
+          }
+        }
+      }
+    }
+  }
+}
