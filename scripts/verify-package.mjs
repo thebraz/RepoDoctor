@@ -19,7 +19,7 @@ try {
   const expected = ['LICENSE', 'README.md', 'package.json', 'report.schema.json', ...['analysis', 'cli', 'duplication', 'files', 'graph', 'languages', 'model', 'parser-worker', 'project', 'reports', 'scan', 'score', 'typescript'].map(name => `dist/src/${name}.js`)];
   assert.deepEqual(metadata.files.map(file => file.path).sort(), expected.sort());
   const prefix = path.join(temporary, 'installed with spaces');
-  const installation = run([npmCLI, 'install', '--prefix', prefix, path.join(temporary, metadata.filename), '--offline', '--ignore-scripts', '--no-audit', '--no-fund']);
+  const installation = run([npmCLI, 'install', '--prefix', prefix, path.join(temporary, metadata.filename), '--prefer-offline', '--ignore-scripts', '--no-audit', '--no-fund']);
   assert.equal(installation.status, 0, installation.stderr);
   const installed = path.join(prefix, 'node_modules/repodoctor');
   const manifest = JSON.parse(await readFile(path.join(installed, 'package.json'), 'utf8'));
